@@ -28,14 +28,26 @@ const walk = async (dir) => {
 };
 
 const getCoverForAlbum = async (albumDir) => {
-  const coverPath = path.join(albumDir, 'cover.jpeg');
-  try {
-    await fs.access(coverPath);
-    const relative = path.relative(path.join(process.cwd(), 'public'), coverPath);
-    return `/${relative.split(path.sep).join('/')}`;
-  } catch (error) {
-    return undefined;
+  const coverNames = [
+    'cover.jpeg',
+    'cover.jpg',
+    'cover.png',
+    'cover_itemimage.JPG',
+    'cover_itemimage.jpg',
+    '__ia_thumb.jpg'
+  ];
+
+  for (const coverName of coverNames) {
+    const coverPath = path.join(albumDir, coverName);
+    try {
+      await fs.access(coverPath);
+      const relative = path.relative(path.join(process.cwd(), 'public'), coverPath);
+      return `/${relative.split(path.sep).join('/')}`;
+    } catch {
+      // Try next cover name
+    }
   }
+  return undefined;
 };
 
 const buildTracks = async () => {
