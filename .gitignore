@@ -1,0 +1,8 @@
+node_modules
+.next
+.env
+.env.*
+.DS_Store
+
+# keep audio local only
+public/audio/daft-punk
