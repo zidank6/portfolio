@@ -3,6 +3,7 @@ import path from 'path';
 
 const AUDIO_ROOT = path.join(process.cwd(), 'public', 'audio', 'daft-punk');
 const OUTPUT_PATH = path.join(process.cwd(), 'src', 'data', 'daftpunk.generated.ts');
+const R2_BASE_URL = 'https://pub-68e8e0bfadb945e8a0d92af506b24ea1.r2.dev/daft-punk';
 
 const isMp3 = (file) => file.toLowerCase().endsWith('.mp3');
 const slugify = (value) =>
@@ -37,12 +38,13 @@ const getCoverForAlbum = async (albumDir) => {
     '__ia_thumb.jpg'
   ];
 
+  const albumName = path.basename(albumDir);
+
   for (const coverName of coverNames) {
     const coverPath = path.join(albumDir, coverName);
     try {
       await fs.access(coverPath);
-      const relative = path.relative(path.join(process.cwd(), 'public'), coverPath);
-      return `/${relative.split(path.sep).join('/')}`;
+      return `${R2_BASE_URL}/${encodeURIComponent(albumName)}/${encodeURIComponent(coverName)}`;
     } catch {
       // Try next cover name
     }
@@ -61,19 +63,19 @@ const buildTracks = async () => {
   const tracks = [];
   for (const filePath of files) {
     const albumDir = path.dirname(filePath);
-    const albumName = path.basename(albumDir).toLowerCase();
+    const albumName = path.basename(albumDir);
     const coverSrc = await getCoverForAlbum(albumDir);
     const filename = path.basename(filePath, '.mp3');
     const title = stripTrackNumber(filename).toLowerCase();
     const id = slugify(`${albumName}-${filename}`);
-    const relative = path.relative(path.join(process.cwd(), 'public'), filePath);
-    const src = `/${relative.split(path.sep).join('/')}`;
+    const audioFilename = path.basename(filePath);
+    const src = `${R2_BASE_URL}/${encodeURIComponent(albumName)}/${encodeURIComponent(audioFilename)}`;
 
     tracks.push({
       id,
       title,
       artist: 'daft punk',
-      album: albumName,
+      album: albumName.toLowerCase(),
       src,
       coverSrc
     });
